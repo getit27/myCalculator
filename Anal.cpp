@@ -182,6 +182,24 @@ void Anal::analexpression()
 			return;
 		}
 	}
+	if(state==number)
+	{
+		dealNumber(order);
+		state=waiting;
+		order="";
+	}
+	else if(state==word)
+	{
+		state=waiting;
+		if(dealWord(order)==1)
+		{
+			error==undefinedword;
+			errorlocal=len-1-order.length();
+				return;
+		}
+		order="";
+	}
+	return;
 }
 
 
