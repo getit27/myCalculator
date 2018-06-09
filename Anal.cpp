@@ -44,7 +44,7 @@ Anal::~Anal()
 }
 
 
-void Anal::analexpression()
+void Anal::analExpression()
 {
 	int state=0;//0:wait for new order1:number2:word
 	const int waiting=0;

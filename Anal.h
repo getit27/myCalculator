@@ -39,6 +39,6 @@ private:
 public:
 	Anal(string expression);
 	~Anal();
-	void analexpression();
+	void analExpression();
 	list<int> getResult();
 };
