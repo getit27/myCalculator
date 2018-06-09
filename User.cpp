@@ -1,4 +1,4 @@
-#include"User.cpp"
+#include"User.h"
 
 void ui()
 {
@@ -7,7 +7,7 @@ void ui()
 	{
 		printf("enter your expression,'q(uit)' to quit:\n");
 		
-	}
+	}while(1);
 
 }
 

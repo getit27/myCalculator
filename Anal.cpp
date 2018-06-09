@@ -1,8 +1,34 @@
 #include"Anal.h"
 
-Anal::void printerror()
+void Anal::printerror()
 {
-
+	printf("error:");
+	switch(error)
+	{
+	case 1:
+		printf("unexpected number");
+		break;
+	case 2:
+		printf("invalid char");
+		break;
+	case 3:
+		printf("unexpected alpha");
+		break;
+	case 4:
+		printf("undefined word");
+		break;
+	case 5:
+		printf("unknown state");
+		break;
+	defalut:
+		printf("unknown error");
+	}
+	printf("\n");
+	cout<<strexpression<<endl;
+	for(int i=0;i<errorlocal;i++)
+		printf(" ");
+	printf("^\n");
+	return;
 }
 
 
@@ -18,7 +44,7 @@ Anal::~Anal()
 }
 
 
-Anal::void analexpression()
+void Anal::analexpression()
 {
 	int state=0;//0:wait for new order1:number2:word
 	const int waiting=0;
@@ -28,22 +54,58 @@ Anal::void analexpression()
 	string order;
 
 	int len=strexpression.size();
-	error=NULL;
+	error=none;
 	for(int i=0;i<len;i++)
 	{
 		if(strexpression[i]=='+'||strexpression[i]=='-'||strexpression[i]=='*'||strexpression[i]=='/'||strexpression[i]=='('||strexpression[i]==')'||strexpression[i]=='^'||strexpression[i]=='|')
 		{
-
+			if(state==number)
+			{
+				dealNumber(order);
+				order="";
+				state=waiting;
+				dealSymbol(strexpression[i]);
+			}
+			if(state==word)
+			{
+				if(dealWord(order)==1)
+				{
+					error==undefinedword;
+					errorlocal=i-order.length();
+					return;
+				}
+				order="";
+				state=waiting;
+				dealSymbol(strexpression[i]);
+			}
+			if(state==complexnumber)
+			{
+				dealComplex();
+				state=waiting;
+				dealSymbol(strexpression[i]);
+			}
+			if(state==waiting)
+			{
+				dealSymbol(strexpression[i]);
+			}
+			else
+			{
+				error=unknownstate;
+				errorlocal=i;
+				return;
+			}
 		}
 		else if(isdigit(strexpression[i]))
 		{
 			if(state==waiting)
 			{
-			
+				order="";
+				order+=strexpression[i];
+				state=number;
 			}
 			else if(state==number)
 			{
-
+				order+=strexpression[i];
 			}
 			else
 			{
@@ -52,25 +114,25 @@ Anal::void analexpression()
 				return;
 			}
 		}
-		else if(isahpha(strexpression[i]))
+		else if(isalpha(strexpression[i]))
 		{
 			if(state==waiting)
 			{
 				state=word;
 				order="";
 				order+=strexpression[i];
-
 			}
 			else if(state==word)
 			{
-				orser+=strexpression[i];
+				order+=strexpression[i];
 			}
 			else if(state==number)
 			{
 				if(strexpression[i]=='i')
 				{
 					state=complexnumber;
-					//
+					dealNumber(order);
+					order="";
 				}
 				else
 				{
@@ -78,6 +140,12 @@ Anal::void analexpression()
 					errorlocal=i;
 					return;
 				}
+			}
+			else
+			{
+				error=unexpectedalpha;
+				errorlocal=i;
+				return;
 			}
 		}
 		else if(strexpression[i]==' ')
@@ -87,12 +155,24 @@ Anal::void analexpression()
 			else if(state==word)
 			{
 				state=waiting;
-				dealWord(order);
+				if(dealWord(order)==1)
+				{
+					error==undefinedword;
+					errorlocal=i-order.length();
+					return;
+				}
 				order="";
 			}
 			else if(state==number)
 			{
-		
+				state=waiting;
+				dealNumber(order);
+				order="";	
+			}
+			else if(state==complexnumber)
+			{
+				state=waiting;
+				dealComplex();
 			}
 		}
 		else
@@ -101,35 +181,73 @@ Anal::void analexpression()
 			errorlocal=i;
 			return;
 		}
-
+	}
 }
 
 
-Anal::list<int> getResult()
+list<int> Anal::getResult()
 {
 	return listexpression;
 }
 
 
-Anal::void dealWord(string word)
+int Anal::dealWord(string word)
 {
-
+	int wordcode;
+	if(word=="dig")
+		wordcode=-6;
+	else if(word=="arg")
+		wordcode=-7;
+	else return 1;
+	return 0;
 }
 //put it into list
 
-Anal::void dealNumber(string number)
+void Anal::dealNumber(string number)
 {
-
+	listexpression.insert(listexpression.end(),stol(number));
+	return;
 }
 
 
-Anal::void dealComplex(string)
+void Anal::dealComplex()
 {
-
+	listexpression.insert(listexpression.end(),I);
+	return;
 }
 
 
-Anal::void dealSymbol(char symbol)
+void Anal::dealSymbol(char symbol)
 {
-
+	int symbolcode;
+	switch(symbol)
+	{
+	case '+':
+		symbolcode=add;
+		break;
+	case '-':
+		symbolcode=subtract;
+		break;
+	case '*':
+		symbolcode=multiply;
+		break;
+	case '/':
+		symbolcode=divide;
+		break;
+	case '(':
+		symbolcode=leftbracket;
+		break;
+	case ')':
+		symbolcode=rightbracket;
+		break;
+	case '|':
+		symbolcode=membrane;
+		break;
+	case '^':
+		symbolcode=power;
+		break;
+	}
+	listexpression.insert(listexpression.end(),symbolcode);
+	return;
 }
+
